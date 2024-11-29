@@ -1,18 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { Moon, Sun, Search, LogOut } from 'lucide-react';
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { Moon, Sun, Search, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "next-themes";
 import { useToast } from "@/hooks/use-toast";
-import apiClient from '@/utils/api';
+import apiClient from "@/utils/axiosClient";
 
-
-function getTokenFromCookie() {
-  const cookies = document.cookie.split('; ');
-  const tokenCookie = cookies.find(row => row.startsWith('token='));
-  return tokenCookie ? tokenCookie.split('=')[1] : null;
+// Lấy token từ cookie
+function getTokenFromCookie(): string | null {
+  const cookies = document.cookie.split("; ");
+  const tokenCookie = cookies.find((row) => row.startsWith("token="));
+  return tokenCookie ? tokenCookie.split("=")[1] : null;
 }
 
 const Header: React.FC = () => {
@@ -21,24 +23,25 @@ const Header: React.FC = () => {
   const router = useRouter();
   const { toast } = useToast();
 
+  // Kiểm tra xem user có token không
   useEffect(() => {
-    // Kiểm tra xem user có token trong cookie không
     const token = getTokenFromCookie();
-    setIsLoggedIn(!!token); // Chuyển thành true nếu có token
+    setIsLoggedIn(!!token); // True nếu có token
   }, []);
 
+  // Xử lý logout
   const handleLogout = async () => {
     try {
-      const response = await apiClient.post('logout');
+      const response = await apiClient.post("/logout");
 
       if (response.status === 200) {
-        document.cookie = 'token=; Max-Age=0; path=/;';
+        document.cookie = "token=; Max-Age=0; path=/;"; // Xóa token khỏi cookie
         setIsLoggedIn(false);
         toast({
           title: "Logged out",
           description: "You have been logged out successfully.",
         });
-        router.push('/');
+        router.push("/auth/login"); // Chuyển hướng về login
       }
     } catch (error) {
       toast({
@@ -49,18 +52,16 @@ const Header: React.FC = () => {
     }
   };
 
-  
-
   return (
     <header className="bg-background border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 text-2xl font-bold text-primary">
-              Logo
-            </Link>
-          </div>
+          {/* Logo */}
+          <Link href="/" className="text-2xl font-bold text-primary">
+            Logo
+          </Link>
 
+          {/* Search Input */}
           <div className="flex-1 max-w-xl px-4">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -68,7 +69,9 @@ const Header: React.FC = () => {
             </div>
           </div>
 
+          {/* Buttons: Theme Toggle + Auth */}
           <div className="flex items-center space-x-4">
+            {/* Toggle Light/Dark Theme */}
             <Button
               variant="ghost"
               size="icon"
@@ -81,15 +84,26 @@ const Header: React.FC = () => {
             </Button>
 
             {isLoggedIn ? (
-              <Button variant="ghost" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
+              <>
+                {/* Logout Button */}
+                <Button variant="ghost" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+
+                {/* Profile Link */}
+                <Button asChild>
+                  <Link href="/profile">Profile</Link>
+                </Button>
+              </>
             ) : (
               <>
+                {/* Login Link */}
                 <Button variant="ghost" asChild>
                   <Link href="/auth/login">Login</Link>
                 </Button>
+
+                {/* Register Link */}
                 <Button asChild>
                   <Link href="/auth/register">Register</Link>
                 </Button>

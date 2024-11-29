@@ -1,7 +1,9 @@
 
+
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import LoginPage from "@/components/auth/loginfrom";
+import RegisterPage from "@/components/auth/register";
+
 
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
@@ -18,7 +20,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <LoginPage/>
+      <RegisterPage/>
       <Footer />
     </>
   );

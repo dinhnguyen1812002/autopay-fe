@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Mail, Lock } from 'lucide-react'
-import Link from 'next/link'
 
 interface LoginFormData {
   email: string
@@ -114,9 +113,9 @@ export default function LoginPage() {
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-sm text-center text-gray-500">
             Don't have an account?{' '}
-            <Link href="/auth/register" className="text-primary hover:underline">
+            <a href="/register" className="text-primary hover:underline">
               Create an account
-            </Link>
+            </a>
           </div>
         </CardFooter>
       </Card>

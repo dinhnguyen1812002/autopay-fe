@@ -3,20 +3,25 @@ import { useAuth } from '@/components/AuthContext'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Mail, Lock } from 'lucide-react'
+import { User, Mail, Lock } from 'lucide-react'
 import Link from 'next/link'
 
-interface LoginFormData {
+interface RegisterFormData {
+  name: string
   email: string
   password: string
+  passwordConfirmation: string
 }
 
-export default function LoginPage() {
-  const { login } = useAuth()
-  const [formData, setFormData] = useState<LoginFormData>({
+export default function RegisterPage() {
+  const { register } = useAuth()
+  const [formData, setFormData] = useState<RegisterFormData>({
+    name: '',
     email: '',
-    password: ''
+    password: '',
+    passwordConfirmation: ''
   })
   const [error, setError] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
@@ -29,15 +34,24 @@ export default function LoginPage() {
     }))
   }
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setIsLoading(true)
 
     try {
-      await login(formData.email, formData.password)
+      if (formData.password !== formData.passwordConfirmation) {
+        throw new Error('Passwords do not match')
+      }
+      
+      await register(
+        formData.name,
+        formData.email,
+        formData.password,
+        formData.passwordConfirmation
+      )
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Login failed')
+      setError(error instanceof Error ? error.message : 'Registration failed')
     } finally {
       setIsLoading(false)
     }
@@ -47,21 +61,38 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access your account
+            Enter your details below to create your account
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleRegister} className="space-y-4">
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-700">Email</p>
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Enter your name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -77,24 +108,33 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <p className="text-sm font-medium text-gray-700">Password</p>
-                <a 
-                  href="/forgot-password" 
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </a>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="password"
                   name="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="Create a password"
                   value={formData.password}
+                  onChange={handleChange}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="passwordConfirmation">Confirm Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="passwordConfirmation"
+                  name="passwordConfirmation"
+                  type="password"
+                  placeholder="Confirm your password"
+                  value={formData.passwordConfirmation}
                   onChange={handleChange}
                   className="pl-10"
                   required
@@ -107,15 +147,15 @@ export default function LoginPage() {
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Creating account..." : "Create account"}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-sm text-center text-gray-500">
-            Don't have an account?{' '}
-            <Link href="/auth/register" className="text-primary hover:underline">
-              Create an account
+            Already have an account?{' '}
+            <Link href="/auth/login" className="text-primary hover:underline">
+              Sign in
             </Link>
           </div>
         </CardFooter>
